@@ -24,7 +24,7 @@ public class ApplicationConfig {
 
     @Bean(name = "dataSource")
     public DataSource dataSource() {
-        String RDS_ENDPOINT = "jupiter-xy-database.cxlhjwneh5fv.us-east-1.rds.amazonaws.com";
+        String RDS_ENDPOINT = "streamscout-database.cpwwkogcq1uv.us-east-2.rds.amazonaws.com";
         String USERNAME = "admin";
         String PASSWORD = "Yao87957585";
         //需要修改红色部分, 保留其他内容,  YOUR_RDS_INSTANCE_ADDRESS,USERNAME,  PASSWORD are information created last lesson

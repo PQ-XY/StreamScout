@@ -1,0 +1,16 @@
+/* Style submenu background and title */
+.custom-submenu .ant-menu-submenu-title {
+  background-color: white !important;
+  color: #1e1e2f !important;
+}
+
+/* Style the icon */
+.custom-submenu .submenu-icon {
+  color: #1e1e2f !important;
+}
+
+/* Optional: handle hover/focus states */
+.custom-submenu .ant-menu-submenu-title:hover {
+  background-color: #f0f0f0 !important;
+  color: #1e1e2f !important;
+}

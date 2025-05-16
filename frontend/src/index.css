@@ -1,0 +1,10 @@
+.site-layout-background {
+  background: #1e1e2f;
+}
+
+
+.site-top-game-list ul {
+  max-height: 700px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}

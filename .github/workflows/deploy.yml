@@ -50,7 +50,7 @@ jobs:
         run: zip -r deploy.zip deploy
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4.6.2
         with:
           name: deploy-zip
           path: deploy.zip
@@ -61,7 +61,7 @@ jobs:
 
     steps:
       - name: Download Artifact
-        uses: actions/download-artifact@v4.6.2
+        uses: actions/download-artifact@v3
         with:
           name: deploy-zip
           path: deploy

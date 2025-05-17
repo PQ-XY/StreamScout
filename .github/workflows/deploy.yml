@@ -41,10 +41,14 @@ jobs:
 
       - name: Prepare Deployment Artifact
         run: |
-          mkdir deploy
-          cp backend/target/*.jar deploy/app.jar
-          cp -r frontend/build deploy/frontend_build
-          # Add appspec.yml and scripts to deploy folder if not already in repo
+              mkdir -p deploy
+              echo "Listing backend/target contents:"
+              ls -la backend/target
+              echo "Listing frontend/build contents:"
+              ls -la frontend/build
+
+              cp backend/target/*.jar deploy/app.jar
+              cp -r frontend/build deploy/frontend_build
 
       - name: Zip Deployment Artifact
         run: zip -r deploy.zip deploy

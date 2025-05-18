@@ -3,7 +3,7 @@ name: Build and Deploy to AWS EC2 via S3
 on:
   push:
     branches:
-      - main   # Or your deployment branch
+      - main
 
 jobs:
   build:
@@ -13,8 +13,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # If you have backend and frontend, build both accordingly
-      # Example: Build React frontend
+      # Frontend: Build React app
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
@@ -28,7 +27,7 @@ jobs:
         working-directory: ./frontend
         run: npm run build
 
-      # Example: Build Java backend
+      # Backend: Build Java app
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
@@ -37,58 +36,43 @@ jobs:
 
       - name: Build Backend
         working-directory: ./backend
-        run: ./mvnw clean package   # or your build command
+        run: ./mvnw clean package
 
+      # Prepare deployment bundle
       - name: Prepare Deployment Artifact
         run: |
-          mkdir deploy
+          mkdir -p deploy/scripts
           cp backend/target/*.war deploy/app.war
           cp -r frontend/build deploy/frontend_build
           cp appspec.yml deploy/
-          cp -r scripts deploy/scripts
+          cp -r scripts/* deploy/scripts/
 
       - name: Zip Deployment Artifact
         run: zip -r deploy.zip deploy
 
-      - name: Upload to S3
-        uses: jakejarvis/s3-sync-action@v0.5.1
-        with:
-          args: --acl private
-        env:
-          AWS_S3_BUCKET: streamscout-deploy-artifacts 
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: us-east-2
-          SOURCE_DIR: .
-          DEST_DIR: deploy.zip
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Download Artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: deploy-zip
-          path: .
-
+      # Upload to S3
       - name: Upload to S3
         run: |
           aws s3 cp deploy.zip s3://streamscout-deploy-artifacts/deploy.zip
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: region us-east-2
+          AWS_REGION: us-east-2
 
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
       - name: Trigger CodeDeploy Deployment
         run: |
           aws deploy create-deployment \
             --application-name StreamScoutApp \
             --deployment-group-name StreamScoutGroup \
-            --s3-location bucket=streamscout-deploy-artifacts,bundleType=zip,key=deploy.zip \
+            --s3-location bucket=streamscout-deploy-artifacts,key=deploy.zip,bundleType=zip \
             --region $AWS_REGION
-
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: us-east-2
+

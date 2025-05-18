@@ -47,7 +47,7 @@ jobs:
               echo "Listing frontend/build contents:"
               ls -la frontend/build
 
-              cp backend/target/*.jar deploy/app.jar
+              cp backend/target/*.war deploy/app.war
               cp -r frontend/build deploy/frontend_build
 
       - name: Zip Deployment Artifact

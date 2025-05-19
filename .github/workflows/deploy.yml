@@ -1,4 +1,4 @@
-name: Build and Deploy to AWS EC2 via S3
+name: CI/CD for StreamScout WAR App
 
 on:
   push:
@@ -6,73 +6,63 @@ on:
       - main
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+    - name: Checkout source
+      uses: actions/checkout@v3
 
-      # Frontend: Build React app
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 22
+    - name: Set up Java 21
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '21'
 
-      - name: Install Frontend Dependencies
-        working-directory: ./frontend
-        run: npm install
+    - name: Build React frontend
+      run: |
+        cd frontend
+        npm install
+        npm run build
 
-      - name: Build Frontend
-        working-directory: ./frontend
-        run: npm run build
+    - name: Inject frontend into backend webapp
+      run: |
+        rm -rf backend/src/main/webapp/*
+        cp -r frontend/build/* backend/src/main/webapp/
 
-      # Backend: Build Java app
-      - name: Setup Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '21'
+    - name: Build backend WAR
+      run: |
+        cd backend
+        mvn clean install
 
-      - name: Build Backend
-        working-directory: ./backend
-        run: ./mvnw clean package
+    - name: Rename WAR to jupiter.war
+      run: |
+        cp backend/target/jupiter-1.0-SNAPSHOT.war jupiter.war
 
-      # Prepare deployment bundle
-      - name: Prepare Deployment Artifact
-        run: |
-          mkdir -p deploy/scripts
-          cp backend/target/*.war deploy/app.war
-          cp -r frontend/build deploy/frontend_build
-          cp appspec.yml deploy/
-          cp -r scripts/* deploy/scripts/
+    - name: Copy WAR and Dockerfile to EC2
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        port: ${{ secrets.EC2_SSH_PORT }}
+        source: |
+          jupiter.war
+          Dockerfile
+        target: ~/streamscout
 
-      - name: Zip Deployment Artifact
-        run: zip -r deploy.zip deploy
+    - name: SSH into EC2 and deploy container
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        port: ${{ secrets.EC2_SSH_PORT }}
+        script: |
+          cd ~/streamscout
+          docker stop streamscout || true
+          docker rm streamscout || true
+          docker build -t streamscout .
+          docker run -d -p 80:8080 --name streamscout streamscout
 
-      # Upload to S3
-      - name: Upload to S3
-        run: |
-          aws s3 cp deploy.zip s3://streamscout-deploy-artifacts/deploy.zip
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: us-east-2
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Trigger CodeDeploy Deployment
-        run: |
-          aws deploy create-deployment \
-            --application-name StreamScoutApp \
-            --deployment-group-name StreamScoutGroup \
-            --s3-location bucket=streamscout-deploy-artifacts,key=deploy.zip,bundleType=zip \
-            --region $AWS_REGION
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: us-east-2
 

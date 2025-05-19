@@ -43,6 +43,15 @@ jobs:
       run: |
         ls -lh jupiter.war Dockerfile
 
+    - name: List files in workspace before SCP
+      run: |
+        echo "Root dir files:"
+        ls -l
+        echo "jupiter.war exists?"
+        test -f jupiter.war && echo "Yes" || echo "No"
+        echo "Dockerfile exists?"
+        test -f Dockerfile && echo "Yes" || echo "No"
+
     - name: Upload WAR and Dockerfile to EC2
       uses: appleboy/scp-action@v0.1.7
       with:
@@ -50,8 +59,9 @@ jobs:
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_SSH_KEY }}
         port: ${{ secrets.EC2_SSH_PORT }}
-        source: "./jupiter.war ./Dockerfile"
+        source: "jupiter.war, Dockerfile"
         target: ~/streamscout
+        debug: true
 
     - name: SSH into EC2 and deploy Docker container
       uses: appleboy/ssh-action@v1.0.0

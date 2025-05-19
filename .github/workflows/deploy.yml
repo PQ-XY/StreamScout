@@ -35,9 +35,20 @@ jobs:
         cd backend
         mvn clean install
 
+    - name: Debug backend build output
+      run: |
+        ls -l backend/target/
+
     - name: Rename WAR to jupiter.war
       run: |
         cp backend/target/jupiter-1.0-SNAPSHOT.war jupiter.war
+
+    - name: Ensure WAR file exists
+      run: |
+        if [ ! -f "jupiter.war" ]; then
+          echo "Error: jupiter.war is missing."
+          exit 1
+        fi
     
     - name: List files before SCP
       run: |

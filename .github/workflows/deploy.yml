@@ -38,6 +38,12 @@ jobs:
     - name: Rename WAR to jupiter.war
       run: |
         cp backend/target/jupiter-1.0-SNAPSHOT.war jupiter.war
+    
+    - name: List files before SCP
+      run: |
+        ls -l backend/target/
+        ls -l backend/
+        ls -l
 
     - name: Copy WAR and Dockerfile to EC2
       uses: appleboy/scp-action@v0.1.7
@@ -47,7 +53,7 @@ jobs:
         key: ${{ secrets.EC2_SSH_KEY }}
         port: ${{ secrets.EC2_SSH_PORT }}
         source: |
-          jupiter.war
+          backend/target/jupiter.war
           Dockerfile
         target: ~/streamscout
 

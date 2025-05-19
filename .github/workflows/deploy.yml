@@ -53,7 +53,7 @@ jobs:
         key: ${{ secrets.EC2_SSH_KEY }}
         port: ${{ secrets.EC2_SSH_PORT }}
         source: |
-          backend/target/jupiter.war
+          jupiter.war
           Dockerfile
         target: ~/streamscout
 

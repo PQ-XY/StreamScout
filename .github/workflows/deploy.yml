@@ -50,9 +50,7 @@ jobs:
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_SSH_KEY }}
         port: ${{ secrets.EC2_SSH_PORT }}
-        source: |
-          jupiter.war
-          Dockerfile
+        source: "./jupiter.war ./Dockerfile"
         target: ~/streamscout
 
     - name: SSH into EC2 and deploy Docker container

@@ -61,7 +61,7 @@ jobs:
         port: ${{ secrets.EC2_SSH_PORT }}
         source: |
           jupiter.war
-          Dockerfile
+          backend/Dockerfile
         target: ~/streamscout
 
     - name: SSH into EC2 and deploy container

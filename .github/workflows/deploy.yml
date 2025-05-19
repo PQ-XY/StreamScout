@@ -72,10 +72,10 @@ jobs:
         port: ${{ secrets.EC2_SSH_PORT }}
         script: |
           cd ~/streamscout
-          docker stop streamscout || true
-          docker rm streamscout || true
-          docker build -t streamscout .
-          docker run -d -p 80:8080 --name streamscout streamscout
+          docker stop jupiter || true
+          docker rm jupiter || true
+          docker build -t jupiter .
+          docker run -d -p 80:8080 jupiter
 
 
 

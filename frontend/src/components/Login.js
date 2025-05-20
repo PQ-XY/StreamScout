@@ -37,10 +37,10 @@ function Login({ onSuccess }) {
       </Button>
       <Modal
         title="Log in"
-        open={displayModal}
+        visible={displayModal}
         onCancel={handleCancel}
         footer={null}
-        destroyOnHidden={true}
+        destroyOnClose={true}
       >
         <Form
           name="normal_login"

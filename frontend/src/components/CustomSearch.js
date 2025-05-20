@@ -43,7 +43,7 @@ const onSubmit = (data) => {
       </Button>
       <Modal
         title="Search"
-        open={displayModal}
+        visible={displayModal}
         onCancel={handleCancel}
         footer={null}
       >

@@ -35,10 +35,10 @@ function Register() {
         Register</Button>
       <Modal
         title="Register"
-        open={displayModal}
+        visible={displayModal}
         onCancel={handleCancel}
         footer={null}
-        destroyOnHidden={true}
+        destroyOnClose={true}
       >
         <Form
           name="normal_register"

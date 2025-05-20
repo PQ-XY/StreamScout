@@ -27,8 +27,13 @@ jobs:
 
     - name: Inject frontend into backend webapp
       run: |
-        rm -rf backend/src/main/webapp/*
+        # Remove only non-directory files and existing static assets (not WEB-INF)
+        find backend/src/main/webapp/ -maxdepth 1 -type f -delete
+        rm -rf backend/src/main/webapp/static
+
+        # Copy React build output into webapp/
         cp -r frontend/build/* backend/src/main/webapp/
+
 
     - name: Build backend WAR
       run: |

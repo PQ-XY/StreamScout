@@ -19,11 +19,22 @@ jobs:
         distribution: 'temurin'
         java-version: '21'
 
+    - name: Run React tests
+      run: |
+        cd frontend
+        npm ci
+        npm test -- --watchAll=false
+
     - name: Build React frontend
       run: |
         cd frontend
         npm install
         npm run build
+
+    - name: Run backend tests
+      run: |
+        cd backend
+        mvn test
 
     - name: Inject frontend into backend webapp
       run: |

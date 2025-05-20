@@ -52,7 +52,7 @@ jobs:
         echo "Dockerfile exists?"
         test -f Dockerfile && echo "Yes" || echo "No"
 
-    - name: Upload WAR and Dockerfile to EC2
+    - name: Upload WAR and Dockerfile to EC2 home directory
       uses: appleboy/scp-action@v0.1.7
       with:
         host: ${{ secrets.EC2_HOST }}
@@ -60,7 +60,7 @@ jobs:
         key: ${{ secrets.EC2_SSH_KEY }}
         port: ${{ secrets.EC2_SSH_PORT }}
         source: "jupiter.war, Dockerfile"
-        target: ~/streamscout
+        target: ~/
         debug: true
 
     - name: SSH into EC2 and deploy Docker container
@@ -71,11 +71,15 @@ jobs:
         key: ${{ secrets.EC2_SSH_KEY }}
         port: ${{ secrets.EC2_SSH_PORT }}
         script: |
-          cd ~/streamscout
+          cd ~
+          ls -l jupiter.war Dockerfile
           docker stop streamscout || true
           docker rm streamscout || true
           docker build -t streamscout .
           docker run -d -p 80:8080 --name streamscout streamscout
+          sleep 5
+          docker logs streamscout | tail -n 30
+
 
 
 
